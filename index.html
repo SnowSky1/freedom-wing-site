@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="自由之翼。以真实三维模型、骨骼变形与交互动效，重新认识这件来自特战英雄的经典武器。">
+  <title>自由之翼 — Freedom Wing</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
+  <link rel="stylesheet" href="./portfolio.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#design">跳至产品介绍</a>
+  <header class="header">
+    <a class="brand" href="#top" aria-label="自由之翼，返回开场">
+      <svg class="brand-mark" viewBox="0 0 40 32" fill="none" aria-hidden="true"><path d="M3 5 18 12v15L3 15V5Zm34 0-15 7v15l15-12V5Z" fill="currentColor"/><path d="m0 0 18 8v2L0 3V0Zm40 0L22 8v2l18-7V0Z" fill="currentColor"/></svg>
+      <span>FREEDOM WING<small>自由之翼</small></span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="#design">设计</a>
+      <a href="#assembly">拆解</a>
+      <a href="#transformation">形态</a>
+      <a href="#anatomy">骨骼</a>
+      <a href="#performance">游戏表现</a>
+    </nav>
+    <a class="header-cta" href="#experience">亲自探索 <span aria-hidden="true">↗</span></a>
+    <div class="page-progress" aria-hidden="true"></div>
+  </header>
+
+  <main>
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-visual" aria-hidden="true"><div class="studio-floor"></div></div>
+      <canvas id="hero-echo" class="hero-echo" aria-hidden="true"></canvas>
+      <div id="hero-canvas" class="hero-canvas" role="img" aria-label="自由之翼蓝白机身的三维产品展示"></div>
+      <img id="hero-fallback" class="hero-fallback" src="./assets/game-reference.png" alt="自由之翼游戏原图">
+      <div class="hero-topline mono"><span>SELECTED WEAPON / 001</span><span>DESIGN STUDY</span></div>
+      <div class="hero-heading">
+        <h1 id="hero-title"><span lang="en">Freedom Wing</span><span>自由之翼</span><span>可变形武器</span></h1>
+        <p class="hero-project-meta">特战英雄 · 传说级武器 · 交互设计研究</p>
+        <p class="hero-description">冷白装甲，冰蓝流光。<br>在步枪与狙击之间，自由切换。</p>
+      </div>
+      <div class="hero-bottom">
+        <div class="hero-intro"><h2>ABOUT THE WEAPON</h2><p>造型与材质 &nbsp; 双形态变换 &nbsp; 骨骼与动作</p></div>
+        <a class="scroll-link" href="#design"><span>向下探索</span><span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-foot mono"><span>Freedom Wing · 自由之翼</span><span>Project 01</span><span>Interactive weapon study</span></div>
+    </section>
+
+    <div class="story" id="story">
+      <div class="stage-sticky">
+        <div class="model-stage" id="story-canvas" role="img" aria-label="自由之翼三维模型，随页面滚动旋转并在步枪与狙击形态之间变换"></div>
+        <div class="stage-fallback" id="story-fallback"><img src="./assets/game-reference.png" alt="游戏中的蓝白色自由之翼"><p class="loading-label mono">正在载入三维模型 <span class="loading-dots">...</span></p></div>
+        <div class="model-caption"><span><i class="status-dot"></i><span id="story-form">S1 · 步枪形态</span></span><span class="mono" id="story-angle">000°</span></div>
+        <div class="stage-ruler" aria-hidden="true"><span class="mono">Freedom Wing</span><span class="mono">Study <b id="story-number">01</b></span><div class="ruler-line"><i></i></div><span class="mono">Scroll to explore</span></div>
+      </div>
+
+      <section class="story-step" id="design" aria-labelledby="design-title">
+        <div class="step-copy">
+          <p class="section-kicker mono"><span>01 / DESIGN & MATERIALS</span></p>
+          <h2 id="design-title">锋芒，<br>藏于细节。</h2>
+          <p class="project-subtitle">Design & materials</p>
+          <p class="section-body">冷白装甲勾勒轮廓，深色机身承托蓝色流光。让每一道切面，在光线中显露。</p>
+          <div class="material-swatches" aria-label="机身配色"><span><i class="swatch-white"></i>冷白装甲</span><span><i class="swatch-dark"></i>石墨机身</span><span><i class="swatch-blue"></i>冰蓝能量</span></div>
+          <div class="step-bottom"><span>DESIGN LANGUAGE</span><p>几何切面 &nbsp; 冷白装甲 &nbsp; 冰蓝流光</p></div>
+        </div>
+      </section>
+      <section class="story-step assembly-step" id="assembly" aria-labelledby="assembly-title">
+        <div class="step-copy">
+          <p class="section-kicker mono"><span>02 / EXPLODED VIEW</span></p>
+          <h2 id="assembly-title">展开细节。<br>重新组合。</h2>
+          <p class="project-subtitle">Every part has its place.</p>
+          <p class="section-body">枪管前移，装甲打开，组件逐层分离。随滚动绕行观察，再看每个部件回到原位。</p>
+          <div class="assembly-phases" aria-label="滚动拆解过程"><span data-assembly-phase="open">01 展开</span><span data-assembly-phase="inspect">02 环视</span><span data-assembly-phase="close">03 组合</span></div>
+          <p class="quiet-note">慢慢下滑，观察从整体到部件的变化。</p>
+          <div class="step-bottom"><span>ASSEMBLY STUDY</span><p>分离部件 &nbsp; 旋转观察 &nbsp; 精准归位</p></div>
+        </div>
+      </section>
+      <section class="story-step" id="transformation" aria-labelledby="transform-title">
+        <div class="step-copy">
+          <p class="section-kicker mono"><span>03 / TRANSFORMATION</span></p>
+          <h2 id="transform-title">一把武器，<br>两种形态。</h2>
+          <p class="project-subtitle">One weapon. Two forms.</p>
+          <p class="section-body">从紧凑的步枪姿态，到舒展的狙击轮廓。枪身展开、组件位移，变形发生在你向下滚动的每一刻。</p>
+          <div class="form-line"><span>S1 <small>步枪</small></span><span class="form-arrow" aria-hidden="true">⟶</span><span>S2 <small>狙击</small></span></div>
+          <p class="quiet-note">继续下滑展开，向上回滚收拢。</p>
+          <div class="step-bottom"><span>TRANSFORMATION</span><p>组件展开 &nbsp; 枪管延展 &nbsp; 双向切换</p></div>
+        </div>
+      </section>
+      <section class="story-step" id="anatomy" aria-labelledby="anatomy-title">
+        <div class="step-copy">
+          <p class="section-kicker mono"><span>04 / ANATOMY</span></p>
+          <h2 id="anatomy-title">看见外形。<br>也看见内在。</h2>
+          <p class="project-subtitle">Beneath the surface</p>
+          <p class="section-body">18 根骨骼联动，让枪身的每次开合都有迹可循。透过表面，观察关节、层级与机械结构如何协同运动。</p>
+          <div class="anatomy-stats"><div><strong>18</strong><span>驱动骨骼</span></div><div><strong>3,499</strong><span>第一人称三角面</span></div></div>
+          <div class="segmented light" aria-label="结构显示方式">
+            <button type="button" data-anatomy="xray" aria-pressed="true">透视结构</button>
+            <button type="button" data-anatomy="solid" aria-pressed="false">完整材质</button>
+            <button type="button" data-anatomy="bones" aria-pressed="false">仅看骨骼</button>
+          </div>
+          <div class="step-bottom"><span>STRUCTURE</span><p>18 根骨骼 &nbsp; 层级联动 &nbsp; 实时透视</p></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="experience" id="experience" aria-labelledby="experience-title">
+      <div class="section-heading">
+        <p class="section-kicker mono"><span>05 / IN MOTION</span><span>INTERACTIVE SHOWROOM</span></p>
+        <div class="heading-row"><h2 id="experience-title">让每个细节，<br>动起来。</h2><p>转动视角，切换形态。<br>把熟悉的武器，握在自己的节奏里。</p></div>
+        <div class="section-end"><span>EXPLORE THE MOTION</span><p>展开组合 &nbsp; 形态切换 &nbsp; 骨骼 &nbsp; 旋转观察</p></div>
+      </div>
+      <div class="lab" id="lab">
+        <div class="lab-topline"><span class="lab-state"><i class="status-dot"></i><span id="lab-state" role="status" aria-live="polite">准备模型中</span></span><span class="mono">FREEDOM WING / LIVE VIEW</span></div>
+        <div class="lab-canvas" id="lab-canvas" role="img" aria-label="可拖动查看的自由之翼三维模型"></div>
+        <img class="lab-fallback" id="lab-fallback" src="./assets/game-reference.png" alt="自由之翼游戏原图">
+        <div class="lab-callout mono"><span id="lab-form-number">S1</span><small id="lab-form-label">ASSAULT FORM</small></div>
+        <div class="lab-bottomline"><span class="drag-hint"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6M3 3l6 6m12-6-6 6M3 21l6-6m12 6-6-6" stroke="currentColor" stroke-width="1.3"/></svg>拖动旋转 · 双击复位</span><button class="text-button" type="button" id="reset-view">重置视角 <span aria-hidden="true">↺</span></button></div>
+      </div>
+      <div class="lab-controls">
+        <div class="control-group"><span class="control-label mono">01 / 形态</span><div class="segmented"><button type="button" data-form="s1" aria-pressed="true" disabled>S1 步枪</button><button type="button" data-form="s2" aria-pressed="false" disabled>S2 狙击</button></div></div>
+        <div class="control-group motion-controls"><span class="control-label mono">02 / 动作</span><div class="action-buttons"><button type="button" id="play-explode" aria-pressed="false" disabled>展开</button><button type="button" id="play-transform" disabled><span aria-hidden="true">⇄</span> 变形</button><button type="button" id="play-reload" disabled><span aria-hidden="true">↻</span> 换弹</button><button type="button" id="play-demo" aria-pressed="false" disabled>完整演示</button></div></div>
+        <div class="control-group"><span class="control-label mono">03 / 观察</span><div class="action-buttons"><button type="button" id="toggle-bones" aria-pressed="false" disabled>骨骼</button><button type="button" id="toggle-rotate" aria-pressed="false" disabled>自转</button><button type="button" id="toggle-view" aria-pressed="false" disabled>第三人称</button></div></div>
+      </div>
+      <div class="timeline-row"><button type="button" id="play-pause" class="timeline-play" aria-label="播放变形动画" disabled>▶</button><label for="animation-scrub" class="mono">变形进度</label><input id="animation-scrub" type="range" min="0" max="100" value="0" step="0.1" aria-label="手动控制步枪至狙击的变形进度" disabled><output id="animation-progress" for="animation-scrub" class="mono">0%</output></div>
+      <div class="assembly-row"><label for="assembly-scrub" class="mono">拆解程度</label><input id="assembly-scrub" type="range" min="0" max="100" value="0" step="0.1" aria-label="手动控制部件展开与组合程度" disabled><output id="assembly-progress" for="assembly-scrub" class="mono">0%</output></div>
+      <p class="experience-note">展开组合为部件结构演示；变形与换弹使用原有武器骨骼动作。展示不包含角色手臂，光效为网页重现。</p>
+    </section>
+
+    <section class="performance" id="performance" aria-labelledby="performance-title">
+      <p class="section-kicker mono"><span>06 / IN THE GAME</span><span>来自特战英雄</span></p>
+      <div class="heading-row"><h2 id="performance-title">不止于陈列。<br>更在于上场。</h2><p>记忆里的蓝色流光，<br>以及随时切换战斗节奏的自由。</p></div>
+      <div class="game-grid">
+        <button class="game-image" type="button" id="open-reference" aria-label="查看完整游戏图鉴原图"><img src="./assets/game-stats-2.jpg" alt="特战英雄原始游戏图鉴中的自由之翼、武器参数和外观" loading="lazy" width="600" height="402"><span class="image-label mono">ORIGINAL GAME ARCHIVE <i aria-hidden="true">↗</i></span></button>
+        <div class="game-details">
+          <p class="game-category mono">LEGENDARY / 传说级</p>
+          <h3>一个按键。<br>转换你的战斗方式。</h3>
+          <p>游戏中按 <kbd>V</kbd> 切换武器形态。从连续输出到精准瞄准，让同一把武器回应不同的交战距离。</p>
+          <div class="game-numbers"><div><strong>40<span>/80</span></strong><small>图鉴载弹量</small></div><div><strong>11.11</strong><small>图鉴射速 · 发/秒</small></div></div>
+          <p class="source-note">参数摘自随项目保存的游戏图鉴，仅对应截图中的形态。</p>
+          <button class="underlined-link" id="open-stats" type="button">阅读原始属性卡 <span aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+      <div class="feature-strip">
+        <article><span class="mono">01</span><h3>形随战局</h3><p>以形态切换连接不同战斗节奏，在变化中保有熟悉的操控感。</p></article>
+        <article><span class="mono">02</span><h3>机械有序</h3><p>展开、收拢、换弹。细致的部件运动，让每次操作都有清晰反馈。</p></article>
+        <article><span class="mono">03</span><h3>流光相随</h3><p>蓝色能量沿枪身流转，为冷白装甲留下鲜明的视觉标记。</p></article>
+      </div>
+    </section>
+
+    <section class="closing" aria-labelledby="closing-title"><p class="mono">THE FORM CHANGES. THE SPIRIT REMAINS.</p><h2 id="closing-title">形态万变。<br><span>自由如一。</span></h2><a class="closing-link" href="#experience">再探索一次 <span aria-hidden="true">↗</span></a></section>
+  </main>
+  <footer><a class="footer-brand" href="#top">FREEDOM WING<span>自由之翼</span></a><p>特战英雄 · 武器交互展示<br><span>非官方作品 · 模型与游戏素材版权归原权利方所有</span></p><a class="back-top mono" href="#top">BACK TO TOP ↑</a></footer>
+  <dialog id="image-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><h2 id="dialog-title">原始游戏图鉴</h2><button type="button" id="close-dialog" aria-label="关闭原图">×</button></div><img id="dialog-image" src="./assets/game-stats-2.jpg" alt="自由之翼原始游戏图鉴"><p>项目保存的原始游戏资料</p></dialog>
+  <noscript><div class="noscript-note">启用 JavaScript 即可体验三维旋转与变形。图文介绍仍可直接浏览。</div></noscript>
+</body>
+</html>

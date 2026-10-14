@@ -1,0 +1,12 @@
+{
+  "name": "freedom-wing-showcase",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "自由之翼 — scroll-driven interactive weapon showcase",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "check": "node --check app.js && node --check weapon-scene.js && node --check server.mjs"
+  }
+}
