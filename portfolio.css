@@ -168,9 +168,18 @@ img { display: block; max-width: 100%; }
 .performance > .heading-row { grid-row: 2; grid-column: 1; flex-direction: column; align-items: flex-start; padding-right: 3vw; margin: 27px 0; }
 .performance > .heading-row > p { display: none; }
 .game-grid { display: contents; }
-.game-image { grid-column: 2; grid-row: 1/4; padding: 4vw 3vw 0; background: transparent; border: 0; position: relative; display: flex; flex-direction: column; justify-content: center; overflow: hidden; min-height: 660px; }
-.game-image img { width: 100%; height: auto; object-fit: contain; transition: transform .5s; }
-.game-image:hover img { transform: scale(1.025); }
+.game-image { grid-column: 2; grid-row: 1/4; padding: 4vw 3vw 0; margin: 0; background: transparent; border: 0; position: relative; display: flex; flex-direction: column; justify-content: center; overflow: hidden; min-height: 660px; }
+#game-display .image-label { display: none; }
+.game-scene-display { position: relative; width: 100%; aspect-ratio: 512 / 256; overflow: hidden; isolation: isolate; pointer-events: none; user-select: none; }
+.game-scene-image { width: 100%; height: 100%; object-fit: fill; display: block; }
+.game-canvas { position: absolute; top: 14%; left: 12%; width: 76%; height: 64%; pointer-events: none; }
+.game-canvas canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
+.game-gallery-controls { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 1.6%; pointer-events: none; }
+.game-gallery-controls button { pointer-events: auto; border: 0; background: transparent; color: #f2b52d; font-size: clamp(28px, 3vw, 54px); line-height: 1; text-shadow: 0 1px 5px #001522; padding: 12px; opacity: .9; }
+.game-gallery-controls button:hover { opacity: 1; transform: scale(1.05); }
+.game-gallery-label { position: absolute; left: 50%; top: 5.5%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; color: #d9edf3; text-shadow: 0 1px 5px #001522; pointer-events: none; white-space: nowrap; }
+.game-gallery-label strong { font-size: clamp(10px, 1.15vw, 18px); font-weight: 400; }
+.game-gallery-label span { font: 7px var(--sans); letter-spacing: .11em; opacity: .75; }
 .image-label { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 22px 0; font-size: 8px; color: #596466; }
 .image-label i { font-size: 20px; font-style: normal; }
 .game-details { grid-column: 1; grid-row: 3; padding: 0 4vw 34px 0; }
@@ -319,6 +328,9 @@ dialog p { margin-top: 16px; font-size: 9px; color: #888; }
   .performance > .heading-row { margin: 19px 0 26px; }
   .game-grid { display: flex; flex-direction: column; }
   .game-image { min-height: 0; padding: 30px 20px 0; margin: 0 -4px; }
+  .game-gallery-controls button { font-size: 32px; padding: 8px; }
+  .game-gallery-label strong { font-size: 10px; }
+  .game-gallery-label span { font-size: 5px; }
   .image-label { font-size: 7px; padding: 18px 0; }
   .game-details { padding: 30px 0 0; }
   .game-category { font-size: 8px; margin-bottom: 12px; }

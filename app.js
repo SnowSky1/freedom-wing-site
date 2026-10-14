@@ -5,8 +5,15 @@ const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
 const lerp = (a, b, t) => a + (b - a) * t;
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 let reducedMotion = motionQuery.matches;
-let resources, heroScene, storyScene, labScene;
-let visible = !document.hidden, heroVisible = true, storyVisible = false, labVisible = false;
+let resources, heroScene, storyScene, labScene, gameScene;
+let gameGallery = null;
+let gameIndex = 0;
+let gameSwitchToken = 0;
+let gameInitPromise = null;
+let gameActiveId = null;
+const galleryResourceCache = new Map();
+let visible = !document.hidden, heroVisible = true, storyVisible = false, labVisible = false, gameVisible = false;
+let gameFailed = false;
 let storyProgress = 0, targetProgress = 0, anatomyMode = 'xray';
 let lastTime = 0, raf = 0, playback = null, labForm = 's1', labBones = false;
 let pausedPlayback = null, scrubbed = false, contextFailure = false;
@@ -14,6 +21,9 @@ let labSpread = 0;
 let geometry = {};
 const story = $('#story');
 const lab = $('#lab');
+const gameDisplay = $('#game-display');
+const gamePrevious = $('#game-prev');
+const gameNext = $('#game-next');
 const storyCanvas = $('#story-canvas');
 const storyForm = $('#story-form');
 const storyNumber = $('#story-number');
@@ -295,8 +305,13 @@ function frame(timestamp) {
     const pulse = playback?.type === 'transform' ? Math.sin(playback.position / playback.end * Math.PI) : 0;
     labScene.render(timestamp / 1000, delta, pulse);
   }
+  if (gameVisible && gameScene && !gameFailed) {
+    // A fixed presentation: only time changes its heading. No user-controlled
+    // camera, pose, animation, or material controls are attached to this scene.
+    gameScene.render(timestamp / 1000, delta);
+  }
   // Suspend both WebGL renderers when their sections are out of view.
-  if ((heroVisible && heroScene) || (storyVisible && storyScene) || (labVisible && labScene)) requestFrame();
+  if ((heroVisible && heroScene) || (storyVisible && storyScene) || (labVisible && labScene) || (gameVisible && gameScene && !gameFailed)) requestFrame();
 }
 
 const visibilityObserver = new IntersectionObserver(entries => {
@@ -307,6 +322,10 @@ const visibilityObserver = new IntersectionObserver(entries => {
       labVisible = entry.isIntersecting;
       if (labVisible && resources && !labScene && !contextFailure) initLab();
     }
+    if (entry.target === gameDisplay) {
+      gameVisible = entry.isIntersecting;
+      if (gameVisible && resources && !gameScene && !gameFailed && !gameInitPromise) initGameDisplay();
+    }
   });
   lastTime = 0;
   requestFrame();
@@ -314,6 +333,7 @@ const visibilityObserver = new IntersectionObserver(entries => {
 visibilityObserver.observe(story);
 visibilityObserver.observe(lab);
 visibilityObserver.observe(hero);
+visibilityObserver.observe(gameDisplay);
 
 const navObserver = new IntersectionObserver(entries => {
   const current = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
@@ -406,7 +426,6 @@ function openImage(file, title) {
   dialog.showModal();
   document.body.style.overflow = 'hidden';
 }
-$('#open-reference').addEventListener('click', () => openImage('game-stats-2.jpg', '自由之翼 · 原始游戏图鉴'));
 $('#open-stats').addEventListener('click', () => openImage('game-stats-1.jpg', '自由之翼 · 原始属性卡'));
 $('#close-dialog').addEventListener('click', () => dialog.close());
 dialog.addEventListener('click', event => {
@@ -429,6 +448,96 @@ function showFailure(message, storyOnly = false) {
 }
 
 let SceneClass;
+let loadResourcePackage;
+function fallbackGameDisplay() {
+  gameFailed = true;
+  gameDisplay.classList.remove('is-live');
+  $('#game-display-status').textContent = '原始游戏图鉴';
+}
+function updateGameGalleryLabel() {
+  const item = gameGallery?.weapons?.[gameIndex];
+  if (!item) return;
+  $('#game-gallery-name').textContent = item.label;
+  $('#game-gallery-latin').textContent = `${String(gameIndex + 1).padStart(2, '0')} / ${String(gameGallery.weapons.length).padStart(2, '0')}${item.appearanceLabel ? ' · ' + item.appearanceLabel : ''}`;
+  gameDisplay.setAttribute('aria-label', `${item.label}，游戏原场景检视，自动旋转`);
+}
+async function setGameWeapon(index) {
+  if (!gameGallery?.weapons?.length || !SceneClass || gameFailed) return;
+  const items = gameGallery.weapons;
+  const nextIndex = (index + items.length) % items.length;
+  const item = items[nextIndex];
+  const token = ++gameSwitchToken;
+  gameDisplay.dataset.loading = 'true';
+  gameDisplay.setAttribute('aria-busy', 'true');
+  gamePrevious.disabled = true;
+  gameNext.disabled = true;
+  try {
+    if (!galleryResourceCache.has(item.id)) {
+      galleryResourceCache.set(item.id, loadResourcePackage(item).catch(error => {
+        galleryResourceCache.delete(item.id);
+        throw error;
+      }));
+    }
+    const galleryResources = await galleryResourceCache.get(item.id);
+    if (token !== gameSwitchToken) return;
+    const effects = await SceneClass.loadInspectionEffects(galleryResources);
+    if (token !== gameSwitchToken) { effects.forEach(entry => entry.effect.dispose()); return; }
+    if (gameScene) gameScene.replaceResources(galleryResources);
+    else gameScene = new SceneClass($('#game-canvas'), galleryResources, {
+      dark: true, interactive: false, reducedMotion, inspection: true,
+    });
+    gameScene.setForm('s1');
+    gameScene.setExplosion(0);
+    gameScene.setStructure('solid');
+    gameScene.yaw = -Math.PI / 2 + .14;
+    gameScene.pitch = -.04;
+    gameScene.roll = 0;
+    gameScene.zoom = 1;
+    gameScene.autoRotate = true;
+    gameScene.renderer.toneMappingExposure = .84;
+    gameScene.attachInspectionEffects(effects);
+    gameScene.resize();
+    gameScene.render(0, 0);
+    gameIndex = nextIndex;
+    gameActiveId = item.id;
+    updateGameGalleryLabel();
+    gameDisplay.classList.add('is-live');
+    gameDisplay.dataset.weapon = item.id;
+    $('#game-display-status').textContent = reducedMotion ? '游戏检视 · 仅供展示' : '自动旋转 · 仅供展示';
+    requestFrame();
+  } catch (error) {
+    console.error('游戏武器检视加载失败', item.id, error);
+    $('#game-display-status').textContent = '本次载入未完成，请再次切换';
+    // Keep the previous successfully rendered gun and its matching label.
+    requestFrame();
+  } finally {
+    if (token === gameSwitchToken) {
+      gameDisplay.dataset.loading = 'false';
+      gameDisplay.setAttribute('aria-busy', 'false');
+      gamePrevious.disabled = false;
+      gameNext.disabled = false;
+    }
+  }
+}
+function initGameDisplay() {
+  if (gameInitPromise) return gameInitPromise;
+  gameInitPromise = (async () => {
+    if (!gameGallery) {
+      const response = await fetch('./assets/gallery.json');
+      if (!response.ok) throw new Error(`gallery.json: HTTP ${response.status}`);
+      gameGallery = await response.json();
+      gameIndex = Math.max(0, gameGallery.weapons.findIndex(item => item.id === 'freedom'));
+    }
+    await setGameWeapon(gameIndex);
+  })().catch(error => {
+    console.error('游戏检视初始化失败', error);
+    fallbackGameDisplay();
+  }).finally(() => { gameInitPromise = null; });
+  return gameInitPromise;
+}
+$('#game-canvas').addEventListener('modelerror', fallbackGameDisplay);
+gamePrevious.addEventListener('click', () => setGameWeapon(gameIndex - 1));
+gameNext.addEventListener('click', () => setGameWeapon(gameIndex + 1));
 function initLab() {
   try {
     labScene = new SceneClass($('#lab-canvas'), resources, { interactive: true, reducedMotion });
@@ -445,6 +554,7 @@ async function init() {
   try {
     const module = await import('./weapon-scene.js');
     SceneClass = module.WeaponScene;
+    loadResourcePackage = module.loadResourcePackage;
     resources = await module.loadResources();
     heroScene = new SceneClass($('#hero-canvas'), resources, { reducedMotion });
     $('#hero-fallback').classList.add('loaded');
@@ -452,6 +562,7 @@ async function init() {
     $('#story-fallback').classList.add('loaded');
     document.documentElement.dataset.modelReady = 'true';
     if (labVisible) initLab();
+    if (gameVisible) initGameDisplay();
     storyProgress = targetProgress;
     requestFrame();
   } catch (error) {
@@ -469,6 +580,10 @@ motionQuery.addEventListener('change', event => {
   reducedMotion = event.matches;
   if (heroScene) heroScene.reducedMotion = reducedMotion;
   if (storyScene) storyScene.reducedMotion = reducedMotion;
+  if (gameScene) {
+    gameScene.reducedMotion = reducedMotion;
+    if (!gameFailed) $('#game-display-status').textContent = reducedMotion ? '游戏图鉴 · 仅供展示' : '自动旋转 · 仅供展示';
+  }
   if (labScene) {
     labScene.reducedMotion = reducedMotion;
     if (reducedMotion) {
@@ -482,9 +597,11 @@ motionQuery.addEventListener('change', event => {
 $$('#hero-canvas, #story-canvas, #lab-canvas').forEach(element => element.addEventListener('modelerror', event => showFailure(event.detail)));
 window.__freedomWing = {
   getState: () => ({
-    ready: Boolean(storyScene), heroVisible, storyVisible, labVisible, reducedMotion,
+    ready: Boolean(storyScene), heroVisible, storyVisible, labVisible, gameVisible, gameFailed, reducedMotion,
     progress: storyProgress, targetProgress,
     hero: heroScene?.diagnostics(), story: storyScene?.diagnostics(), lab: labScene?.diagnostics(),
+    game: gameScene?.diagnostics(),
+    gallery: { activeId: gameActiveId, index: gameIndex, count: gameGallery?.weapons.length ?? 0, loading: gameDisplay.dataset.loading === 'true' },
     form: labForm, playback: playback ? { ...playback } : null,
     paused: Boolean(pausedPlayback), contextFailure,
   }),

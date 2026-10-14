@@ -131,7 +131,18 @@
       <p class="section-kicker mono"><span>06 / IN THE GAME</span><span>来自特战英雄</span></p>
       <div class="heading-row"><h2 id="performance-title">不止于陈列。<br>更在于上场。</h2><p>记忆里的蓝色流光，<br>以及随时切换战斗节奏的自由。</p></div>
       <div class="game-grid">
-        <button class="game-image" type="button" id="open-reference" aria-label="查看完整游戏图鉴原图"><img src="./assets/game-stats-2.jpg" alt="特战英雄原始游戏图鉴中的自由之翼、武器参数和外观" loading="lazy" width="600" height="402"><span class="image-label mono">ORIGINAL GAME ARCHIVE <i aria-hidden="true">↗</i></span></button>
+        <figure class="game-image" id="game-display" aria-label="游戏原场景中的自由之翼，自转展示，界面只读">
+          <div class="game-scene-display">
+            <img class="game-scene-image" src="./assets/game-mall-scene.jpg" alt="从游戏资源提取的商城武器检视台原始场景" loading="lazy" width="512" height="256" draggable="false">
+            <div id="game-canvas" class="game-canvas" aria-hidden="true"></div>
+            <div class="game-gallery-controls" aria-label="武器检视切换">
+              <button type="button" id="game-prev" aria-label="上一把武器" disabled>‹</button>
+              <div class="game-gallery-label" role="status" aria-live="polite" aria-atomic="true"><strong id="game-gallery-name">自由之翼</strong><span id="game-gallery-latin">01 / 10</span></div>
+              <button type="button" id="game-next" aria-label="下一把武器" disabled>›</button>
+            </div>
+          </div>
+          <figcaption class="image-label mono"><span>IN-GAME SCENE / WEAPON INSPECTION</span><span id="game-display-status">自动旋转 · 仅供展示</span></figcaption>
+        </figure>
         <div class="game-details">
           <p class="game-category mono">LEGENDARY / 传说级</p>
           <h3>一个按键。<br>转换你的战斗方式。</h3>

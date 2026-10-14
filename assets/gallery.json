@@ -1,0 +1,461 @@
+{
+  "version": 2,
+  "default": "freedom",
+  "weapons": [
+    {
+      "id": "freedom",
+      "label": "自由之翼",
+      "latin": "FREEDOM WING",
+      "runtime": "./assets/weapon.json",
+      "skin": "./assets/skin.png",
+      "light": "./assets/light.png",
+      "flipY": true,
+      "overlay": {
+        "scroll": 0.41,
+        "scaleV": 1.85,
+        "gate": 1,
+        "gateValue": 0.9,
+        "color": [
+          -0.27,
+          -0.29,
+          -0.3
+        ],
+        "intensity": 0.7
+      }
+    },
+    {
+      "id": "gold",
+      "label": "黄金圣龙",
+      "latin": "GOLDEN DRAGON",
+      "runtime": "./assets/gallery/gold.json",
+      "skin": "./assets/gallery/gold-skin.png",
+      "light": "./assets/gallery/gold-light.png",
+      "overlay": {
+        "scroll": 0.67,
+        "scaleV": 0.02,
+        "gate": 0.05,
+        "gateValue": 1.0,
+        "color": [
+          0.28,
+          0.04,
+          0.2
+        ],
+        "intensity": 0.6
+      },
+      "flipY": false,
+      "decorations": [
+        {
+          "source": "weapon/m4a1/effect/machine_dragon.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": true,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__m4a1__effect__machine_dragon/effect.json",
+          "sha256": "76db0868596eddee139bda621aaf304f086284d53fb56b1eb4f3ed4da5aeb234",
+          "particles": 9
+        }
+      ],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": ""
+    },
+    {
+      "id": "machine",
+      "label": "机械巨龙",
+      "latin": "MACHINE DRAGON",
+      "runtime": "./assets/gallery/machine.json",
+      "skin": "./assets/gallery/machine-skin.png",
+      "light": "./assets/gallery/machine-light.png",
+      "overlay": {
+        "scroll": 0.5,
+        "scaleV": 3.22,
+        "gate": 0.03,
+        "gateValue": 1.0,
+        "color": [
+          -0.3,
+          -0.3,
+          -0.3
+        ],
+        "intensity": 1.0
+      },
+      "flipY": false,
+      "decorations": [],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": ""
+    },
+    {
+      "id": "jinglong",
+      "label": "惊龙",
+      "latin": "JINGLONG",
+      "runtime": "./assets/gallery/jinglong.json",
+      "skin": "./assets/gallery/jinglong-skin.png",
+      "light": "./assets/gallery/jinglong-light.png",
+      "overlay": {
+        "scroll": 0.47,
+        "scaleV": 0.09,
+        "gate": 0.05,
+        "gateValue": 1.0,
+        "color": [
+          0.0,
+          0.0,
+          0.46
+        ],
+        "intensity": 0.44
+      },
+      "flipY": false,
+      "decorations": [
+        {
+          "source": "weapon/m4a1/effect/machine_dragon.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": true,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__m4a1__effect__machine_dragon/effect.json",
+          "sha256": "76db0868596eddee139bda621aaf304f086284d53fb56b1eb4f3ed4da5aeb234",
+          "particles": 9
+        }
+      ],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": ""
+    },
+    {
+      "id": "longteng",
+      "label": "AK47 · 龙腾",
+      "latin": "AK47 / LONGTENG",
+      "runtime": "./assets/gallery/longteng.json",
+      "skin": "./assets/gallery/longteng-skin.png",
+      "light": "./assets/gallery/longteng-light.png",
+      "overlay": {
+        "scroll": 0.0,
+        "scaleV": 2.0,
+        "gate": 1.0,
+        "gateValue": 0.9,
+        "color": [
+          -0.27,
+          -0.29,
+          -0.3
+        ],
+        "intensity": 0.7
+      },
+      "flipY": false,
+      "decorations": [
+        {
+          "source": "weapon/ak/effect/effect_weever_ak.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": false,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__ak__effect__effect_weever_ak/effect.json",
+          "sha256": "5c1f87b4804b0161bf3a1fdd19f1900ed97041f410e5b8f48ad2ad752c175945",
+          "particles": 21
+        }
+      ],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": ""
+    },
+    {
+      "id": "lingshi",
+      "label": "龙腾 · 零式",
+      "latin": "LONGTENG / ZERO",
+      "runtime": "./assets/gallery/lingshi.json",
+      "skin": "./assets/gallery/lingshi-skin.png",
+      "light": null,
+      "overlay": {
+        "scroll": 0,
+        "scaleV": 1,
+        "gate": 1,
+        "gateValue": 1,
+        "color": [
+          0,
+          0,
+          0
+        ],
+        "intensity": 0
+      },
+      "flipY": false,
+      "decorations": [
+        {
+          "source": "weapon/weapon564/idle.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": false,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__weapon564__idle/effect.json",
+          "sha256": "8110f5d82b4120fc6f16e94c5040c2a3033d6f5c2b009b1a6e87a6a3eaeb7c2e",
+          "particles": 91
+        }
+      ],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": ""
+    },
+    {
+      "id": "longyin",
+      "label": "M4A1 · 龙吟",
+      "latin": "M4A1 / LONGYIN",
+      "runtime": "./assets/gallery/longyin.json",
+      "skin": "./assets/gallery/longyin-skin.png",
+      "light": "./assets/gallery/longyin-light.png",
+      "overlay": {
+        "scroll": 0.25,
+        "scaleV": 0.11,
+        "gate": 0.05,
+        "gateValue": 1.0,
+        "color": [
+          0.0,
+          0.0,
+          0.46
+        ],
+        "intensity": 0.42
+      },
+      "flipY": false,
+      "decorations": [
+        {
+          "source": "weapon/m4a1_dragon/effect/idle_ball.pa",
+          "bone": "GunOrigin",
+          "name": "idle_ball",
+          "onlyFp": false,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__m4a1_dragon__effect__idle_ball/effect.json",
+          "sha256": "1c37ac2fae595504d7435be5ff5e4d29f13f42662fe49575174ddb816981e06d",
+          "particles": 14
+        },
+        {
+          "source": "weapon/m4a1_dragon/effect/idle_normal.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": true,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__m4a1_dragon__effect__idle_normal/effect.json",
+          "sha256": "ec85fbfc331d3683b0b7d250baa914205382c19b3b5ca2c0c30fd26e940cc727",
+          "particles": 24
+        }
+      ],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": ""
+    },
+    {
+      "id": "xianglong",
+      "label": "巴雷特 · 祥龙",
+      "latin": "BARRETT / XIANGLONG",
+      "runtime": "./assets/gallery/xianglong.json",
+      "skin": "./assets/gallery/xianglong-skin.png",
+      "light": "./assets/gallery/xianglong-light.png",
+      "overlay": {
+        "scroll": 1.1,
+        "scaleV": 5.0,
+        "gate": 0.06,
+        "gateValue": 1.0,
+        "color": [
+          6.15,
+          0.74,
+          0.1
+        ],
+        "intensity": 0.24
+      },
+      "flipY": false,
+      "decorations": [
+        {
+          "source": "weapon/weapon717/effect/idle.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": false,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__weapon717__effect__idle/effect.json",
+          "sha256": "a67f427f9235d40f15c8bc4f027878eff5c2a3e207c29fd53c8034f015417a13",
+          "particles": 266
+        }
+      ],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": ""
+    },
+    {
+      "id": "heroblt",
+      "label": "黑龙遗愿",
+      "latin": "BLACK DRAGON",
+      "runtime": "./assets/gallery/heroblt.json",
+      "skin": "./assets/gallery/heroblt-skin.png",
+      "light": "./assets/gallery/heroblt-light.png",
+      "overlay": {
+        "scroll": 0.5,
+        "scaleV": 6.5,
+        "gate": 0.04,
+        "gateValue": 1.0,
+        "color": [
+          -0.3,
+          -0.3,
+          -0.3
+        ],
+        "intensity": 1.0
+      },
+      "flipY": false,
+      "decorations": [
+        {
+          "source": "weapon/heroblt/effect/effect_weapon.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": true,
+          "onlyTp": false,
+          "requiresWeapon": 331,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__heroblt__effect__effect_weapon/effect.json",
+          "sha256": "d5d4e4c9d6d91d7282c69f867441f46f784568e0e01ebd4210ca7a834d368765",
+          "particles": 21
+        }
+      ],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": "完整外观"
+    },
+    {
+      "id": "w383",
+      "label": "魔龙 · 梦魇",
+      "latin": "M4A4 / NIGHTMARE",
+      "runtime": "./assets/gallery/w383.json",
+      "skin": "./assets/gallery/w383-skin.png",
+      "light": "./assets/gallery/w383-light.png",
+      "overlay": {
+        "scroll": 0.41,
+        "scaleV": 1.0,
+        "gate": 0.06,
+        "gateValue": 1.0,
+        "color": [
+          0.04,
+          0.03,
+          0.0
+        ],
+        "intensity": 0.44
+      },
+      "flipY": false,
+      "decorations": [
+        {
+          "source": "weapon/m4a4/effect/effect_m4a4_hero_0.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": false,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 200,
+          "url": "./assets/gallery/effects/weapon__m4a4__effect__effect_m4a4_hero_0/effect.json",
+          "sha256": "77ca1702580565fb372a3461766cf9a08d549fa22585986f53b30515e6631419",
+          "particles": 24
+        },
+        {
+          "source": "weapon/m4a4/effect/effect_m4a4_hero_1.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": false,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 800,
+          "url": "./assets/gallery/effects/weapon__m4a4__effect__effect_m4a4_hero_1/effect.json",
+          "sha256": "972816040de092eaf97d8a62af5d4af1862f1251977329760b9a4192f1e2b388",
+          "particles": 20
+        },
+        {
+          "source": "weapon/m4a4/effect/effect_m4a4_hero_2.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": false,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 2000,
+          "url": "./assets/gallery/effects/weapon__m4a4__effect__effect_m4a4_hero_2/effect.json",
+          "sha256": "92821a26f60d3ebb71e524b343c5d57490ad65b6b3f4cd436d125e6090b959d7",
+          "particles": 23
+        },
+        {
+          "source": "weapon/m4a4/effect/effect_m4a4_hero_main.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": false,
+          "onlyTp": false,
+          "requiresWeapon": 0,
+          "kills": 800,
+          "url": "./assets/gallery/effects/weapon__m4a4__effect__effect_m4a4_hero_main/effect.json",
+          "sha256": "2ad85953b816ae2e78876ebe0cca8430e6dab3bfc0fb2b2ef8bc5519993eec57",
+          "particles": 27
+        },
+        {
+          "source": "weapon/w383/gun_effect.pa",
+          "bone": "GunOrigin",
+          "name": null,
+          "onlyFp": true,
+          "onlyTp": false,
+          "requiresWeapon": 331,
+          "kills": 0,
+          "url": "./assets/gallery/effects/weapon__w383__gun_effect/effect.json",
+          "sha256": "fe1feb484d96f02f5976303cac319831bfb2c3199a8355851283d2bacdc9977d",
+          "particles": 50
+        }
+      ],
+      "appearanceProfile": {
+        "view": "fp",
+        "kills": 2000,
+        "companions": [
+          331
+        ]
+      },
+      "appearanceLabel": "完整外观"
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 import * as THREE from './lib/three.module.js';
+import { ParticleEffect, DECORATE_ADJUST } from './gallery-particles.js';
 
 const clamp = THREE.MathUtils.clamp;
-const asset = name => new URL(`./assets/${name}`, import.meta.url).href;
+const resolveAsset = path => new URL(path, import.meta.url).href;
 // Presentation offsets in the recovered model's canonical coordinates.
 // Every triangle belongs to one bone, so moving each bone's geometry as a rigid
 // unit exposes the real parts without cutting the mesh or stretching triangles.
@@ -25,33 +26,59 @@ const PART_MOTION = {
 };
 const ease = value => { const p = clamp(value, 0, 1); return p * p * (3 - 2 * p); };
 let resourcePromise;
+export async function loadResourcePackage(spec) {
+  const loader = new THREE.TextureLoader();
+  const response = await fetch(resolveAsset(spec.runtime));
+  if (!response.ok) throw new Error(`模型加载失败：HTTP ${response.status}`);
+  const runtime = await response.json();
+  const skin = await loader.loadAsync(resolveAsset(spec.skin));
+  const light = spec.light ? await loader.loadAsync(resolveAsset(spec.light)) : skin;
+  skin.flipY = spec.flipY ?? true;
+  light.flipY = spec.flipY ?? true;
+  skin.colorSpace = THREE.SRGBColorSpace;
+  light.colorSpace = THREE.SRGBColorSpace;
+  skin.anisotropy = 4;
+  light.wrapS = light.wrapT = THREE.RepeatWrapping;
+  return {
+    runtime,
+    skin,
+    light,
+    decorations: spec.decorations ?? [],
+    overlay: spec.overlay ?? {
+      scroll: 0.41,
+      scaleV: 1.85,
+      gate: 1,
+      gateValue: 0.9,
+      color: [-0.27, -0.29, -0.3],
+      intensity: 0.7,
+    },
+  };
+}
 export function loadResources() {
   if (!resourcePromise) {
-    const loader = new THREE.TextureLoader();
-    resourcePromise = Promise.all([
-      fetch(asset('weapon.json')).then(response => {
-        if (!response.ok) throw new Error(`模型加载失败：${response.status}`);
-        return response.json();
-      }),
-      loader.loadAsync(asset('skin.png')),
-      loader.loadAsync(asset('light.png')),
-    ]).then(([runtime, skin, light]) => {
-      skin.colorSpace = THREE.SRGBColorSpace;
-      light.colorSpace = THREE.SRGBColorSpace;
-      skin.anisotropy = 4;
-      light.wrapS = light.wrapT = THREE.RepeatWrapping;
-      return { runtime, skin, light };
+    resourcePromise = loadResourcePackage({
+      runtime: './assets/weapon.json',
+      skin: './assets/skin.png',
+      light: './assets/light.png',
     }).catch(error => { resourcePromise = null; throw error; });
   }
   return resourcePromise;
 }
 
 function surfaceMaterial(resources, dark) {
+  const overlay = resources.overlay ?? {};
+  const overlayColor = overlay.color ?? [-0.27, -0.29, -0.3];
   return new THREE.ShaderMaterial({
     uniforms: {
       uSkin: { value: resources.skin }, uLight: { value: resources.light },
       uTime: { value: 0 }, uOpacity: { value: 1 }, uPulse: { value: 0 },
       uAmbient: { value: dark ? 0.53 : 0.49 },
+      uScrollU: { value: overlay.scroll ?? 0.41 },
+      uScaleV: { value: overlay.scaleV ?? 1.85 },
+      uGate: { value: overlay.gate ?? 1 },
+      uGateValue: { value: overlay.gateValue ?? 0.9 },
+      uOverlayColor: { value: new THREE.Vector3(...overlayColor) },
+      uOverlayIntensity: { value: overlay.intensity ?? 0.7 },
     },
     vertexShader: `
       varying vec2 vUv;
@@ -68,14 +95,16 @@ function surfaceMaterial(resources, dark) {
       uniform sampler2D uSkin;
       uniform sampler2D uLight;
       uniform float uTime, uOpacity, uPulse, uAmbient;
+      uniform float uScrollU, uScaleV, uGate, uGateValue, uOverlayIntensity;
+      uniform vec3 uOverlayColor;
       varying vec2 vUv;
       varying vec3 vNormal;
       varying vec3 vView;
       void main(){
         vec3 base = texture2D(uSkin, vUv).rgb;
-        vec3 overlay = texture2D(uLight, vec2(vUv.x - uTime * .41, vUv.y * 1.85)).rgb;
-        overlay = max(overlay + vec3(-.27, -.29, -.30), vec3(0.));
-        overlay *= max(.9 - step(1., vUv.y), 0.) * .7;
+        vec3 overlay = texture2D(uLight, vec2(vUv.x - uTime * uScrollU, vUv.y * uScaleV)).rgb;
+        overlay = max(overlay + uOverlayColor, vec3(0.));
+        overlay *= max(uGateValue - step(uGate, vUv.y), 0.) * uOverlayIntensity;
         vec3 n = normalize(vNormal);
         vec3 view = normalize(vView);
         vec3 key = normalize(vec3(-.3, .8, 1.));
@@ -96,7 +125,7 @@ function surfaceMaterial(resources, dark) {
 
 // The recovered model uses one bone per vertex. Keep the original bind matrices
 // and interpolate the recovered per-frame translations and quaternions directly.
-class WeaponRig {
+export class WeaponRig {
   constructor(resources, kind, dark) {
     this.runtime = resources.runtime;
     this.kind = kind;
@@ -105,6 +134,7 @@ class WeaponRig {
     this.unit = new THREE.Vector3(1, 1, 1);
     this.v = new THREE.Vector3();
     this.v2 = new THREE.Vector3();
+    this.weightedVertex = new THREE.Vector3();
     this.q = new THREE.Quaternion();
     this.q2 = new THREE.Quaternion();
     this.local = new THREE.Matrix4();
@@ -161,10 +191,15 @@ class WeaponRig {
     this.group.add(this.lines, this.bonePoints);
     this.lines.visible = this.bonePoints.visible = false;
     this.lastPose = '';
-    this.pose('switchsub_s1_to_s2', 0);
+    this.defaultClip = this.runtime.animations[this.kind]?.switchsub_s1_to_s2
+      ? 'switchsub_s1_to_s2'
+      : Object.keys(this.runtime.animations[this.kind] ?? {})[0];
+    if (!this.defaultClip) throw new Error(`模型 ${kind} 缺少可用动作`);
+    this.pose(this.defaultClip, 0);
     const envelope = new THREE.Box3().setFromBufferAttribute(this.geometry.attributes.position);
     this.formCenters = { s1: envelope.getCenter(new THREE.Vector3()) };
-    this.pose('switchsub_s1_to_s2', 50);
+    const defaultEnd = this.runtime.animations[this.kind][this.defaultClip].frame_count - 1;
+    this.pose(this.defaultClip, defaultEnd);
     const expandedBox = new THREE.Box3().setFromBufferAttribute(this.geometry.attributes.position);
     this.formCenters.s2 = expandedBox.getCenter(new THREE.Vector3());
     envelope.union(expandedBox);
@@ -172,7 +207,7 @@ class WeaponRig {
     this.size = envelope.getSize(new THREE.Vector3());
     this.length = Math.max(this.size.x, this.size.y, this.size.z);
     this.lastPose = '';
-    this.pose('switchsub_s1_to_s2', 0);
+    this.pose(this.defaultClip, 0);
   }
 
   pose(clipName, frame) {
@@ -196,13 +231,30 @@ class WeaponRig {
       this.skin[i].multiplyMatrices(this.world[i], this.inverse[i]);
     });
     // Cancel the animation's global heading, preserving the component motion.
-    this.v.setFromMatrixPosition(this.world[this.originIndex]);
-    this.v2.setFromMatrixPosition(this.world[this.flashIndex]).sub(this.v);
-    this.rotation.makeRotationY(-Math.atan2(this.v2.x, this.v2.z));
+    if (this.originIndex >= 0 && this.flashIndex >= 0) {
+      this.v.setFromMatrixPosition(this.world[this.originIndex]);
+      this.v2.setFromMatrixPosition(this.world[this.flashIndex]).sub(this.v);
+      this.rotation.makeRotationY(-Math.atan2(this.v2.x, this.v2.z));
+    } else {
+      this.rotation.identity();
+    }
     const joints = this.payload.joint_indices;
     this.centroids.forEach(center => center.set(0, 0, 0));
     for (let i = 0; i < joints.length; i++) {
-      this.v.fromArray(this.base, i * 3).applyMatrix4(this.skin[joints[i]]).applyMatrix4(this.rotation).sub(this.center);
+      if (this.payload.skin_weights) {
+        this.weightedVertex.set(0, 0, 0);
+        for (let influence = 0; influence < 4; influence++) {
+          const weight = this.payload.skin_weights[i * 4 + influence];
+          if (!weight) continue;
+          const joint = this.payload.skin_indices[i * 4 + influence];
+          this.v.fromArray(this.base, i * 3).applyMatrix4(this.skin[joint]);
+          this.weightedVertex.addScaledVector(this.v, weight);
+        }
+        this.v.copy(this.weightedVertex);
+      } else {
+        this.v.fromArray(this.base, i * 3).applyMatrix4(this.skin[joints[i]]);
+      }
+      this.v.applyMatrix4(this.rotation).sub(this.center);
       this.v.toArray(this.posedPositions, i * 3);
       this.centroids[joints[i]].add(this.v);
     }
@@ -280,10 +332,11 @@ class WeaponRig {
 }
 
 export class WeaponScene {
-  constructor(element, resources, { dark = false, interactive = false, reducedMotion = false } = {}) {
+  constructor(element, resources, { dark = false, interactive = false, reducedMotion = false, inspection = false } = {}) {
     this.element = element;
     this.resources = resources;
     this.dark = dark;
+    this.inspection = inspection;
     this.reducedMotion = reducedMotion;
     this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
@@ -294,7 +347,13 @@ export class WeaponScene {
     this.renderer.domElement.setAttribute('aria-hidden', 'true');
     element.append(this.renderer.domElement);
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(30, 1, .1, 3000);
+    this.camera = inspection
+      ? new THREE.OrthographicCamera(-100, 100, 100, -100, .1, 10000)
+      : new THREE.PerspectiveCamera(30, 1, .1, 3000);
+    this.effects = [];
+    this.effectTime = 2.4;
+    this.inspectionEnvelope = null;
+    this.effectTranslation = new THREE.Matrix4();
     this.pivot = new THREE.Group();
     this.scene.add(this.pivot);
     this.rigs = {};
@@ -342,6 +401,28 @@ export class WeaponScene {
     this.renderer.setSize(width, height, false);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    if (this.inspection) {
+      // Fit the whole horizontal turn, not just the initial side. This framing
+      // remains valid when the viewport changes or a different gun is selected.
+      let radial = 0, vertical = 0;
+      const p = new THREE.Vector3();
+      for (let i = 0; i < this.rig.positions.length; i += 3) {
+        p.fromArray(this.rig.positions, i).add(this.rig.group.position);
+        radial = Math.max(radial, Math.hypot(p.x, p.z));
+        vertical = Math.max(vertical, Math.abs(p.y));
+      }
+      radial = Math.max(radial, this.inspectionEnvelope?.radial ?? 0);
+      vertical = Math.max(vertical, this.inspectionEnvelope?.vertical ?? 0) + radial * .06;
+      const halfHeight = Math.max(vertical, radial / this.camera.aspect) * 1.18;
+      this.camera.left = -halfHeight * this.camera.aspect;
+      this.camera.right = halfHeight * this.camera.aspect;
+      this.camera.top = halfHeight;
+      this.camera.bottom = -halfHeight;
+      this.camera.position.set(0, 0, Math.max(radial * 5, 500));
+      this.camera.lookAt(0, 0, 0);
+      this.camera.updateProjectionMatrix();
+      return;
+    }
     // Fit both a side view and a turn through depth in the same stable framing.
     const halfLength = this.rig.length * .52;
     const distance = halfLength / Math.tan(THREE.MathUtils.degToRad(15)) / Math.min(this.camera.aspect, 1.6);
@@ -358,6 +439,106 @@ export class WeaponScene {
   setStructure(mode, amount = 1) {
     this.structure = mode;
     this.rig.setStructure(mode, amount);
+  }
+
+  static async loadInspectionEffects(resources) {
+    const result = [];
+    try {
+      for (const decoration of resources.decorations ?? []) {
+        const effect = await ParticleEffect.load(new URL(decoration.url, import.meta.url).href);
+        result.push({ decoration, effect });
+      }
+      return result;
+    } catch (error) {
+      result.forEach(entry => entry.effect.dispose());
+      throw error;
+    }
+  }
+
+  clearInspectionEffects() {
+    this.effects.forEach(entry => entry.effect.dispose());
+    this.effects = [];
+    this.inspectionEnvelope = null;
+  }
+
+  attachInspectionEffects(entries) {
+    this.clearInspectionEffects();
+    this.effectTime = 2.4;
+    this.effects = entries;
+    for (const entry of entries) {
+      entry.boneIndex = this.rig.payload.bones.findIndex(bone => bone.name === entry.decoration.bone);
+      if (entry.boneIndex < 0) throw new Error(`特效挂点缺失：${entry.decoration.bone}`);
+      entry.effect.root.matrixAutoUpdate = false;
+      this.rig.group.add(entry.effect.root);
+    }
+    // Sample the actual original emitters while framing, including a prewarmed
+    // state so the idle FX is visible immediately and stays inside the canvas.
+    const originalRotation = this.pivot.quaternion.clone();
+    this.pivot.quaternion.identity();
+    this.pivot.updateWorldMatrix(true, true);
+    const extent = { radial: 0, vertical: 0 };
+    for (const time of [0, .6, 1.4, 2.4, 3.2, 4.8]) {
+      this.updateInspectionEffects(time);
+      for (const { effect } of this.effects) {
+        const bounds = effect.worldBounds();
+        if (bounds.isEmpty()) continue;
+        extent.radial = Math.max(extent.radial, Math.hypot(Math.max(Math.abs(bounds.min.x), Math.abs(bounds.max.x)), Math.max(Math.abs(bounds.min.z), Math.abs(bounds.max.z))));
+        extent.vertical = Math.max(extent.vertical, Math.abs(bounds.min.y), Math.abs(bounds.max.y));
+      }
+    }
+    this.pivot.quaternion.copy(originalRotation);
+    this.inspectionEnvelope = extent;
+    this.updateInspectionEffects(this.effectTime);
+    this.resize();
+  }
+
+  updateInspectionEffects(time) {
+    this.effectTranslation.makeTranslation(-this.rig.center.x, -this.rig.center.y, -this.rig.center.z);
+    for (const { effect, boneIndex } of this.effects) {
+      // Match the original viewer's bone.matrixWorld * DECORATE_ADJUST, then
+      // apply the SAME heading compensation/centering as the skinned vertices.
+      effect.root.matrix.copy(this.effectTranslation)
+        .multiply(this.rig.rotation).multiply(this.rig.world[boneIndex]).multiply(DECORATE_ADJUST);
+      effect.root.matrixWorldNeedsUpdate = true;
+      effect.update(time, this.camera);
+    }
+  }
+
+  disposeRig(rig) {
+    rig.group.removeFromParent();
+    for (const geometry of [rig.geometry, rig.boneGeometry, rig.lineGeometry]) geometry.dispose();
+    for (const material of [rig.material, rig.boneMaterial, rig.lineMaterial]) material.dispose();
+  }
+
+  replaceResources(resources, kind = 'fp') {
+    // Keep one WebGL canvas/context for the carousel. Repeated switching should
+    // not exhaust the browser's context limit or invalidate the other studies.
+    const next = new WeaponRig(resources, kind, this.dark);
+    if (!next.positions.every(Number.isFinite)) {
+      this.disposeRig(next);
+      throw new Error('武器顶点数据包含非有限值');
+    }
+    this.clearInspectionEffects();
+    const previousResources = this.resources;
+    for (const rig of Object.values(this.rigs)) this.disposeRig(rig);
+    this.resources = resources;
+    this.kind = kind;
+    this.rig = next;
+    this.rigs = { [kind]: next };
+    this.pivot.add(next.group);
+    if (previousResources !== resources) {
+      previousResources.skin.dispose();
+      if (previousResources.light !== previousResources.skin) previousResources.light.dispose();
+    }
+    this.resize();
+  }
+
+  dispose() {
+    this.resizeObserver?.disconnect();
+    this.clearInspectionEffects();
+    for (const rig of Object.values(this.rigs)) this.disposeRig(rig);
+    this.renderer.dispose();
+    this.element.replaceChildren();
   }
 
   bindPointer() {
@@ -389,9 +570,13 @@ export class WeaponScene {
     this.pivot.rotation.set(this.pitch + this.dragPitch, this.yaw + this.dragYaw, this.roll, 'YXZ');
     const mobileScale = this.width < 600 ? .84 + this.rig.explosion * .25 : 1;
     const expansionScale = (1 - this.rig.explosion * .32) * (1 - this.rig.explosion * this.rig.formProgress * .2);
-    this.pivot.scale.setScalar(this.zoom * mobileScale * expansionScale);
+    this.pivot.scale.setScalar(this.zoom * (this.inspection ? 1 : mobileScale * expansionScale));
     this.rig.material.uniforms.uTime.value = this.reducedMotion ? 0 : time;
     this.rig.material.uniforms.uPulse.value = pulse;
+    if (this.inspection) {
+      if (!this.reducedMotion) this.effectTime += delta;
+      this.updateInspectionEffects(this.effectTime);
+    }
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -418,6 +603,8 @@ export class WeaponScene {
     }
     return {
       kind: this.kind, pose: this.rig.lastPose, yaw: this.yaw, dragYaw: this.dragYaw,
+      size: this.rig.size.toArray(), bonePositions: Array.from(this.rig.bonePositions),
+      textures: { flipY: this.resources.skin.flipY, width: this.resources.skin.image?.width, height: this.resources.skin.image?.height },
       bones: this.rig.payload.bones.length, vertices: this.rig.payload.vertex_count,
       triangles: this.rig.payload.triangle_count, structure: this.structure,
       finite: p.every(Number.isFinite), sample: Array.from(p.slice(90, 99)),
@@ -425,6 +612,9 @@ export class WeaponScene {
       screen,
       explosion: this.rig.explosion, maxEdgeError,
       parts: this.rig.payload.bones.map((bone, i) => ({ name: bone.name, vertices: this.rig.partCounts[i], offset: this.rig.partOffsets[i].toArray() })).filter(part => part.vertices),
+      projection: this.camera.isOrthographicCamera ? 'orthographic' : 'perspective',
+      effects: this.effects.map(({ effect, decoration, boneIndex }) => ({ ...effect.diagnostics(), bone: decoration.bone, boneIndex })),
+      effectTime: this.effectTime,
       calls: this.renderer.info.render.calls, contextLost: this.contextLost,
     };
   }
